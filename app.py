@@ -3,10 +3,9 @@ import secrets
 import hashlib
 from datetime import datetime, timedelta
 import pymysql
-pymysql.install_as_MySQLdb()
+import pymysql.cursors
 
-from flask import Flask, render_template, request, session, redirect, url_for, flash
-from flask_mysqldb import MySQL
+from flask import Flask, render_template, request, session, redirect, url_for, flash, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from email_service import send_welcome_email, send_password_reset_email, send_result_email
@@ -24,7 +23,39 @@ app.config["MYSQL_HOST"] = Config.MYSQL_HOST
 app.config["MYSQL_USER"] = Config.MYSQL_USER
 app.config["MYSQL_PASSWORD"] = Config.MYSQL_PASSWORD
 app.config["MYSQL_DB"] = Config.MYSQL_DB
+app.config["MYSQL_PORT"] = int(getattr(Config, "MYSQL_PORT", 3306))
 app.config["MYSQL_CURSORCLASS"] = "DictCursor"
+
+# ---------------- PURE PYTHON MYSQL WRAPPER ----------------
+class MySQL:
+    def __init__(self, flask_app=None):
+        self.app = flask_app
+        if flask_app is not None:
+            self.init_app(flask_app)
+
+    def init_app(self, flask_app):
+        @flask_app.teardown_appcontext
+        def close_db(exception=None):
+            conn = getattr(g, '_mysql_conn', None)
+            if conn is not None:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+
+    @property
+    def connection(self):
+        if not hasattr(g, '_mysql_conn') or g._mysql_conn is None or not g._mysql_conn.open:
+            g._mysql_conn = pymysql.connect(
+                host=app.config.get("MYSQL_HOST", "localhost"),
+                user=app.config.get("MYSQL_USER", "root"),
+                password=app.config.get("MYSQL_PASSWORD", ""),
+                database=app.config.get("MYSQL_DB", "smartprep"),
+                port=int(app.config.get("MYSQL_PORT", 3306)),
+                cursorclass=pymysql.cursors.DictCursor,
+                autocommit=False
+            )
+        return g._mysql_conn
 
 # ---------------- INITIALIZE MYSQL ----------------
 mysql = MySQL(app)
