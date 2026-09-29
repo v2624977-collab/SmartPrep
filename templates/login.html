@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | Student Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="container">
+    <div class="glass-card">
+        <a href="/" class="home-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+        
+        <h1><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h1>
+        <p class="tagline">Student Account Login</p>
+
+        {% if error %}
+        <div class="error-message">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="input-box">
+                <i class="fa-solid fa-envelope"></i>
+                <input type="email" name="email" placeholder="Email Address" required autocomplete="email">
+            </div>
+
+            <div class="input-box">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+            </div>
+
+            <div style="text-align: right; margin-top: -8px; margin-bottom: 18px;">
+                <a href="{{ url_for('forgot_password') }}" style="color: #38BDF8; font-size: 13px; text-decoration: none; transition: 0.3s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <i class="fa-solid fa-right-to-bracket"></i> Login
+            </button>
+        </form>
+
+        <p class="register-text">
+            Don't have an account? <a href="{{ url_for('register') }}">Register</a>
+        </p>
+
+        <div class="admin-link-box">
+            <a href="{{ url_for('admin_login') }}"><i class="fa-solid fa-shield-halved"></i> Admin Portal</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

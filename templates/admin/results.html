@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep Admin | Master Results Log</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="circle circle1" style="background:#DC2626;"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Admin Navbar -->
+    <header class="dash-nav" style="border-bottom-color: rgba(239, 68, 68, 0.3);">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-shield-halved" style="color:#EF4444;"></i> SmartPrep <span class="admin-badge">Admin</span></h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}"><i class="fa-solid fa-gauge"></i> Overview</a>
+            <a href="{{ url_for('admin_students') }}"><i class="fa-solid fa-users"></i> Students</a>
+            <a href="{{ url_for('admin_exams') }}"><i class="fa-solid fa-book-bookmark"></i> Exams</a>
+            <a href="{{ url_for('admin_questions') }}"><i class="fa-solid fa-circle-question"></i> Questions</a>
+            <a href="{{ url_for('admin_results') }}" class="active"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('admin_logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content">
+        <div class="admin-header-row">
+            <div>
+                <h1><i class="fa-solid fa-square-poll-vertical"></i> Master Results & Test Submissions</h1>
+                <p style="color:#94A3B8; font-size:14px;">Total test submissions recorded: {{ results|length }}</p>
+            </div>
+
+            <!-- Search Submissions -->
+            <form method="GET" class="search-form">
+                <input type="text" name="q" value="{{ search }}" placeholder="Search by student or exam..." class="search-input">
+                <button type="submit" class="btn btn-primary" style="padding:10px 16px;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+                {% if search %}
+                <a href="{{ url_for('admin_results') }}" class="btn btn-secondary" style="padding:10px 14px;">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="glass-card table-card">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Student Email</th>
+                        <th>Exam Name</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Submission Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if results %}
+                        {% for r in results %}
+                        <tr>
+                            <td>#{{ r.result_id }}</td>
+                            <td><strong>{{ r.full_name }}</strong></td>
+                            <td><i class="fa-regular fa-envelope" style="color:#38BDF8; margin-right:5px;"></i> {{ r.email }}</td>
+                            <td>{{ r.exam_name }}</td>
+                            <td><strong>{{ r.score }}</strong> / {{ r.total_questions }}</td>
+                            <td>
+                                <span class="score-pill {% if r.percentage >= 75 %}pill-green{% elif r.percentage >= 50 %}pill-blue{% else %}pill-red{% endif %}">
+                                    {{ r.percentage }}%
+                                </span>
+                            </td>
+                            <td><i class="fa-regular fa-calendar" style="color:#38BDF8; margin-right:5px;"></i> {{ r.test_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:35px; color:#94A3B8;">No results matched your search criteria.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep Admin | {{ action }} Exam</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="circle circle1" style="background:#DC2626;"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Admin Navbar -->
+    <header class="dash-nav" style="border-bottom-color: rgba(239, 68, 68, 0.3);">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-shield-halved" style="color:#EF4444;"></i> SmartPrep <span class="admin-badge">Admin</span></h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}"><i class="fa-solid fa-gauge"></i> Overview</a>
+            <a href="{{ url_for('admin_students') }}"><i class="fa-solid fa-users"></i> Students</a>
+            <a href="{{ url_for('admin_exams') }}" class="active"><i class="fa-solid fa-book-bookmark"></i> Exams</a>
+            <a href="{{ url_for('admin_questions') }}"><i class="fa-solid fa-circle-question"></i> Questions</a>
+            <a href="{{ url_for('admin_results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('admin_logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content" style="max-width:700px;">
+        <div class="glass-card profile-form-card">
+            <h3><i class="fa-solid fa-folder-plus"></i> {{ action }} Exam</h3>
+
+            {% if error %}
+            <div class="alert-box error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                <div class="form-group">
+                    <label>Exam Name</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-book"></i>
+                        <input type="text" name="exam_name" value="{{ exam.exam_name if exam else '' }}" placeholder="e.g. GATE Computer Science" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Exam Description / Syllabus Details</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-align-left"></i>
+                        <input type="text" name="description" value="{{ exam.description if exam else '' }}" placeholder="Brief description of the exam subjects">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Test Duration (Minutes)</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-clock"></i>
+                        <input type="number" name="duration_minutes" value="{{ exam.duration_minutes if exam and exam.duration_minutes else 30 }}" min="5" max="180" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Exam</button>
+                    <a href="{{ url_for('admin_exams') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

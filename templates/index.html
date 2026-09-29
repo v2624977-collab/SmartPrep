@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | AI Powered Exam Preparation System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<header>
+    <nav>
+        <h2 class="logo"><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="{{ url_for('login') }}">Mock Tests</a></li>
+            <li><a href="{{ url_for('admin_login') }}"><i class="fa-solid fa-shield-halved"></i> Admin</a></li>
+        </ul>
+        <div class="nav-buttons">
+            <a href="{{ url_for('login') }}" class="btn login-btn">Login</a>
+            <a href="{{ url_for('register') }}" class="btn register-btn">Register</a>
+        </div>
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-text">
+        <h1>Prepare <span>Smarter</span> with AI</h1>
+        <p>
+            SmartPrep helps students crack competitive exams through AI-powered mock tests,
+            personalized weekly study plans, intelligent performance analytics, and score prediction.
+        </p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('register') }}" class="btn"><i class="fa-solid fa-rocket"></i> Get Started Free</a>
+            <a href="{{ url_for('login') }}" class="btn register-btn"><i class="fa-solid fa-right-to-bracket"></i> Student Login</a>
+        </div>
+    </div>
+
+    <div class="hero-image">
+        <!-- Modern SVG Hero Graphic (Replacing missing PNG) -->
+        <div class="hero-svg-card">
+            <div class="hero-badge"><i class="fa-solid fa-brain"></i> AI Score Prediction</div>
+            <div class="hero-chart-mock">
+                <div class="mock-bar" style="height: 45%;"><span>45%</span></div>
+                <div class="mock-bar" style="height: 65%;"><span>65%</span></div>
+                <div class="mock-bar" style="height: 80%;"><span>80%</span></div>
+                <div class="mock-bar active" style="height: 92%;"><span>92%</span></div>
+            </div>
+            <div class="hero-stats">
+                <div><h4>25+</h4><p>Mock MCQs</p></div>
+                <div><h4>5+</h4><p>Exams</p></div>
+                <div><h4>100%</h4><p>Adaptive AI</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features" id="features">
+    <div class="card">
+        <h2><i class="fa-solid fa-file-pen"></i> Mock Tests</h2>
+        <p>Practice exam-oriented questions with timed assessments and dynamic countdown timers.</p>
+    </div>
+
+    <div class="card">
+        <h2><i class="fa-solid fa-chart-line"></i> AI Analytics</h2>
+        <p>Gain in-depth insights into your score trends, strengths, and weak subject areas.</p>
+    </div>
+
+    <div class="card">
+        <h2><i class="fa-solid fa-calendar-check"></i> Study Planner</h2>
+        <p>Get a customized 7-day weekly schedule automatically tailored to your weak topics.</p>
+    </div>
+
+    <div class="card">
+        <h2><i class="fa-solid fa-bullseye"></i> Score Prediction</h2>
+        <p>Forecast your future mock test score and exam readiness with machine learning models.</p>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 SmartPrep | AI Powered Competitive Exam Preparation and Progress Tracking System</p>
+</footer>
+
+</body>
+</html>

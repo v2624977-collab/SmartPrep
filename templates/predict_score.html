@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | ML Score Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .predict-container {
+            max-width: 1000px;
+            margin: 35px auto 60px;
+        }
+
+        .pred-hero-card {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(14, 165, 233, 0.15));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(18px);
+            margin-bottom: 35px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+        }
+
+        .pred-score-dial {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #0EA5E9);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.5);
+        }
+
+        .pred-score-dial h2 {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .pred-score-dial span {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        .pred-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 750px;
+            margin: 0 auto 25px;
+        }
+
+        @media (max-width: 700px) {
+            .pred-meta-grid { grid-template-columns: 1fr; }
+        }
+
+        .pred-meta-box {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .pred-meta-box h4 {
+            color: #38BDF8;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .pred-meta-box p {
+            color: #94A3B8;
+            font-size: 13px;
+        }
+
+        /* Readiness Bar */
+        .readiness-box {
+            max-width: 600px;
+            margin: 0 auto 25px;
+            text-align: left;
+        }
+
+        .readiness-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #CBD5E1;
+            margin-bottom: 8px;
+        }
+
+        .readiness-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .readiness-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2563EB, #38BDF8, #4ADE80);
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+
+        .explanation-box {
+            background: rgba(15, 23, 42, 0.6);
+            border-left: 4px solid #38BDF8;
+            border-radius: 10px;
+            padding: 16px 20px;
+            max-width: 750px;
+            margin: 0 auto;
+            text-align: left;
+            display: flex;
+            gap: 12px;
+        }
+
+        .explanation-box i {
+            color: #38BDF8;
+            font-size: 18px;
+            margin-top: 3px;
+        }
+
+        .explanation-box p {
+            color: #CBD5E1;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Navbar -->
+    <header class="dash-nav">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ url_for('results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('performance') }}"><i class="fa-solid fa-chart-line"></i> AI Analytics</a>
+            <a href="{{ url_for('study_planner') }}"><i class="fa-solid fa-calendar-check"></i> Study Plan</a>
+            <a href="{{ url_for('predict_score') }}" class="active"><i class="fa-solid fa-brain"></i> Score Predictor</a>
+            <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content predict-container">
+        <div class="page-header" style="margin-bottom: 25px;">
+            <h1><i class="fa-solid fa-wand-magic-sparkles"></i> AI Score Prediction & Readiness Model</h1>
+            <p>Supervised Machine Learning regression forecasting your performance on upcoming mock exams</p>
+        </div>
+
+        {% if prediction.has_prediction %}
+        <!-- Prediction Hero Display -->
+        <div class="pred-hero-card">
+            <div class="pred-score-dial">
+                <h2>{{ prediction.predicted_percentage }}%</h2>
+                <span>Projected Score</span>
+            </div>
+
+            <!-- Readiness Bar -->
+            <div class="readiness-box">
+                <div class="readiness-label">
+                    <span><i class="fa-solid fa-gauge-high"></i> Exam Readiness Index</span>
+                    <strong>{{ prediction.readiness_index }}%</strong>
+                </div>
+                <div class="readiness-bar-bg">
+                    <div class="readiness-bar-fill" style="width: {{ prediction.readiness_index }}%;"></div>
+                </div>
+            </div>
+
+            <!-- Meta Stats Grid -->
+            <div class="pred-meta-grid">
+                <div class="pred-meta-box">
+                    <h4>{{ prediction.predicted_range }}</h4>
+                    <p>Expected Range</p>
+                </div>
+                <div class="pred-meta-box">
+                    <h4>{{ prediction.confidence }}</h4>
+                    <p>Model Confidence</p>
+                </div>
+                <div class="pred-meta-box">
+                    <h4>{{ prediction.tests_evaluated }}</h4>
+                    <p>Historical Tests Evaluated</p>
+                </div>
+            </div>
+
+            <!-- Educational Explanation Box -->
+            <div class="explanation-box">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>{{ prediction.message }}</p>
+            </div>
+        </div>
+
+        <!-- Trajectory Chart -->
+        <div class="glass-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-chart-line"></i> Historical Progression & Forecast</h3>
+                <span class="badge positive">OLS Linear Regression Model</span>
+            </div>
+            <div class="chart-container" style="height: 280px;">
+                <canvas id="predictionChart"></canvas>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Insufficient Data Notice -->
+        <div class="glass-card" style="text-align: center; padding: 60px 30px;">
+            <div style="font-size: 55px; color: #38BDF8; margin-bottom: 20px;">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <h2 style="color: #F8FAFC; margin-bottom: 12px;">More Historical Data Required</h2>
+            <p style="color: #94A3B8; max-width: 520px; margin: 0 auto 30px; line-height: 1.6;">
+                {{ prediction.message }}
+            </p>
+            <a href="{{ url_for('dashboard') }}#available-exams" class="btn btn-primary">
+                <i class="fa-solid fa-play"></i> Complete a Mock Test
+            </a>
+        </div>
+        {% endif %}
+    </main>
+</div>
+
+{% if prediction.has_prediction %}
+<script>
+    const ctx = document.getElementById('predictionChart').getContext('2d');
+    const histPoints = {{ prediction.historical_points | tojson }};
+    const nextAttempt = histPoints.length + 1;
+    const predictedVal = {{ prediction.predicted_percentage }};
+
+    const labels = histPoints.map(p => `Test ${p.attempt}`);
+    labels.push(`Test ${nextAttempt} (Predicted)`);
+
+    const histScores = histPoints.map(p => p.score);
+    // null for historical in predicted dataset, null for predicted in historical dataset
+    const actualData = [...histScores, null];
+    const predictedData = Array(histScores.length - 1).fill(null);
+    predictedData.push(histScores[histScores.length - 1]);
+    predictedData.push(predictedVal);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Actual Scores (%)',
+                    data: actualData,
+                    borderColor: '#38BDF8',
+                    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: false,
+                    pointBackgroundColor: '#2563EB',
+                    pointRadius: 6
+                },
+                {
+                    label: 'Forecast Trajectory',
+                    data: predictedData,
+                    borderColor: '#4ADE80',
+                    borderDash: [6, 6],
+                    borderWidth: 3,
+                    fill: false,
+                    pointBackgroundColor: '#22C55E',
+                    pointRadius: 7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#CBD5E1' }
+                }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100,
+                    grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                    ticks: { color: '#94A3B8', callback: v => v + '%' }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94A3B8' }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+
+</body>
+</html>

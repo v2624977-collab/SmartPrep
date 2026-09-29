@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | Personalized Study Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .planner-container {
+            max-width: 1100px;
+            margin: 35px auto 60px;
+        }
+
+        .planner-header-card {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(14, 165, 233, 0.15));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 20px;
+            padding: 30px 35px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .planner-header-card h1 {
+            font-size: 26px;
+            color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .planner-header-card p {
+            color: #CBD5E1;
+            font-size: 14px;
+        }
+
+        .filter-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 8px 16px;
+        }
+
+        .filter-box select {
+            background: transparent;
+            border: none;
+            color: #38BDF8;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .filter-box select option {
+            background: #0F172A;
+            color: white;
+        }
+
+        /* 7-Day Schedule Grid */
+        .schedule-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .day-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 22px 28px;
+            backdrop-filter: blur(14px);
+            display: grid;
+            grid-template-columns: 180px 1fr 140px;
+            align-items: center;
+            gap: 25px;
+            transition: 0.3s;
+        }
+
+        @media (max-width: 850px) {
+            .day-card {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        .day-card:hover {
+            border-color: rgba(56, 189, 248, 0.35);
+            transform: translateX(4px);
+        }
+
+        .day-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .day-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #38BDF8;
+        }
+
+        .day-duration {
+            font-size: 12px;
+            color: #94A3B8;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .focus-col h3 {
+            font-size: 16px;
+            color: #F8FAFC;
+            margin-bottom: 8px;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .task-list li {
+            font-size: 13px;
+            color: #CBD5E1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-list li i {
+            color: #22C55E;
+            font-size: 12px;
+        }
+
+        .tag-col {
+            text-align: right;
+        }
+
+        @media (max-width: 850px) {
+            .tag-col { text-align: left; }
+        }
+
+        .schedule-tag {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #38BDF8;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Navbar -->
+    <header class="dash-nav">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ url_for('results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('performance') }}"><i class="fa-solid fa-chart-line"></i> AI Analytics</a>
+            <a href="{{ url_for('study_planner') }}" class="active"><i class="fa-solid fa-calendar-check"></i> Study Plan</a>
+            <a href="{{ url_for('predict_score') }}"><i class="fa-solid fa-brain"></i> Score Predictor</a>
+            <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content planner-container">
+        <!-- Planner Header & Filter -->
+        <div class="planner-header-card">
+            <div>
+                <h1><i class="fa-solid fa-calendar-week"></i> Personalized Weekly Study Plan</h1>
+                <p>Curated 7-day preparation timetable designed to target lower-scoring areas while reinforcing core competencies.</p>
+            </div>
+
+            <!-- Target Exam Filter -->
+            <form method="GET" class="filter-box">
+                <i class="fa-solid fa-crosshairs" style="color:#38BDF8;"></i>
+                <label for="exam-select" style="font-size:13px; color:#94A3B8;">Target Exam:</label>
+                <select name="exam" id="exam-select" onchange="this.form.submit()">
+                    <option value="" {% if not selected_exam %}selected{% endif %}>All Recommended</option>
+                    {% for e in all_exams %}
+                    <option value="{{ e.exam_name }}" {% if selected_exam == e.exam_name %}selected{% endif %}>{{ e.exam_name }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <!-- Plan Meta Overview -->
+        <div class="glass-card" style="margin-bottom: 25px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px; padding: 20px;">
+            <div>
+                <span style="color:#94A3B8; font-size:13px;">Plan Type:</span>
+                <strong style="color:#38BDF8; margin-left:6px;"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ plan.plan_type }}</strong>
+            </div>
+            <div>
+                <span style="color:#94A3B8; font-size:13px;">Primary Focus Subject:</span>
+                <strong style="color:#F8FAFC; margin-left:6px;">{{ plan.primary_subject }}</strong>
+            </div>
+            <div>
+                <span style="color:#94A3B8; font-size:13px;">Recommended Daily Study:</span>
+                <strong style="color:#4ADE80; margin-left:6px;"><i class="fa-solid fa-clock"></i> {{ plan.daily_hours }} Hours/Day</strong>
+            </div>
+        </div>
+
+        <!-- 7-Day Day-by-Day Schedule -->
+        <div class="schedule-grid">
+            {% for item in plan.schedule %}
+            <div class="day-card">
+                <div class="day-col">
+                    <span class="day-name">{{ item.day }}</span>
+                    <span class="day-duration"><i class="fa-solid fa-stopwatch"></i> {{ item.duration }}</span>
+                </div>
+
+                <div class="focus-col">
+                    <h3>{{ item.focus }}</h3>
+                    <ul class="task-list">
+                        {% for task in item.tasks %}
+                        <li><i class="fa-solid fa-circle-check"></i> {{ task }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="tag-col">
+                    <span class="schedule-tag">{{ item.tag }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

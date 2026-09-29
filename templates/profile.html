@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | Student Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Navbar Header -->
+    <header class="dash-nav">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ url_for('results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('performance') }}"><i class="fa-solid fa-chart-line"></i> AI Analytics</a>
+            <a href="{{ url_for('study_planner') }}"><i class="fa-solid fa-calendar-check"></i> Study Plan</a>
+            <a href="{{ url_for('predict_score') }}"><i class="fa-solid fa-brain"></i> Score Predictor</a>
+            <a href="{{ url_for('profile') }}" class="active"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content">
+        <div class="page-header">
+            <h1><i class="fa-solid fa-user-gear"></i> Student Profile</h1>
+            <p>Manage your account credentials and personal details</p>
+        </div>
+
+        {% if error %}
+        <div class="alert-box error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        {% if success %}
+        <div class="alert-box success">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>{{ success }}</span>
+        </div>
+        {% endif %}
+
+        <div class="profile-grid">
+            <!-- Account Summary Card -->
+            <div class="glass-card profile-summary">
+                <div class="avatar-circle">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h2>{{ student.full_name }}</h2>
+                <p class="user-email"><i class="fa-solid fa-envelope"></i> {{ student.email }}</p>
+                <div class="badge-role"><i class="fa-solid fa-shield"></i> Verified Student</div>
+
+                <div class="stats-mini">
+                    <div class="stat-mini-box">
+                        <h4>{{ total_tests if total_tests is defined else 0 }}</h4>
+                        <p>Tests Attempted</p>
+                    </div>
+                    <div class="stat-mini-box">
+                        <h4>{{ student.created_at.strftime('%d-%b-%Y') if student.created_at else 'Active' }}</h4>
+                        <p>Member Since</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Details Card -->
+            <div class="glass-card profile-form-card">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Update Profile Information</h3>
+                <form method="POST">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-user"></i>
+                            <input type="text" name="full_name" value="{{ student.full_name }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address (Read-only)</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" value="{{ student.email }}" disabled style="opacity:0.6; cursor:not-allowed;">
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+                    <h4 class="section-subtitle"><i class="fa-solid fa-lock"></i> Change Password (Optional)</h4>
+
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-key"></i>
+                            <input type="password" name="current_password" placeholder="Enter current password to change">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" name="new_password" placeholder="Minimum 6 characters">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" name="confirm_new_password" placeholder="Re-enter new password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

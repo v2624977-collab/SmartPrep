@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Result | SmartPrep</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .result-container {
+            max-width: 900px;
+            margin: 40px auto 60px;
+        }
+
+        .result-summary-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+            margin-bottom: 35px;
+        }
+
+        .result-header h1 {
+            color: #38BDF8;
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .result-header p {
+            color: #94A3B8;
+            font-size: 15px;
+            margin-bottom: 25px;
+        }
+
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #0EA5E9);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.4);
+        }
+
+        .score-circle .score-num {
+            font-size: 38px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .score-circle .score-total {
+            font-size: 14px;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        .accuracy-badge {
+            display: inline-block;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 8px 22px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .kpi-box h4 {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .kpi-box p {
+            font-size: 13px;
+            color: #94A3B8;
+        }
+
+        .text-green { color: #4ADE80; }
+        .text-red { color: #FCA5A5; }
+        .text-yellow { color: #FBBF24; }
+
+        .result-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* Question Review Breakdown */
+        .review-section {
+            margin-top: 40px;
+        }
+
+        .review-title {
+            color: #38BDF8;
+            font-size: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .review-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(14px);
+        }
+
+        .review-card.correct { border-left: 5px solid #22C55E; }
+        .review-card.wrong { border-left: 5px solid #EF4444; }
+        .review-card.unanswered { border-left: 5px solid #F59E0B; }
+
+        .review-q-title {
+            color: #F8FAFC;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .answer-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: rgba(11, 18, 36, 0.7);
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Navbar -->
+    <header class="dash-nav">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ url_for('results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('performance') }}"><i class="fa-solid fa-chart-line"></i> AI Analytics</a>
+            <a href="{{ url_for('study_planner') }}"><i class="fa-solid fa-calendar-check"></i> Study Plan</a>
+            <a href="{{ url_for('predict_score') }}"><i class="fa-solid fa-brain"></i> Score Predictor</a>
+            <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content result-container">
+        <!-- Summary Card -->
+        <div class="result-summary-card">
+            <div class="result-header">
+                <h1>Assessment Completed! 🎉</h1>
+                <p>Candidate: <strong>{{ student_name }}</strong> | Exam: <strong>{{ exam.exam_name if exam else 'Mock Exam' }}</strong></p>
+            </div>
+
+            <div class="score-circle">
+                <span class="score-num">{{ score }}</span>
+                <span class="score-total">out of {{ total_questions }}</span>
+            </div>
+
+            <div class="accuracy-badge {% if percentage >= 75 %}pill-green{% elif percentage >= 50 %}pill-blue{% else %}pill-red{% endif %}">
+                Overall Accuracy: {{ percentage }}%
+            </div>
+
+            <div class="kpi-row">
+                <div class="kpi-box">
+                    <h4 class="text-green"><i class="fa-solid fa-circle-check"></i> {{ correct_answers }}</h4>
+                    <p>Correct Answers</p>
+                </div>
+                <div class="kpi-box">
+                    <h4 class="text-red"><i class="fa-solid fa-circle-xmark"></i> {{ wrong_answers }}</h4>
+                    <p>Wrong Answers</p>
+                </div>
+                <div class="kpi-box">
+                    <h4 class="text-yellow"><i class="fa-solid fa-circle-minus"></i> {{ unanswered }}</h4>
+                    <p>Unanswered</p>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <a href="{{ url_for('start_exam', exam_id=exam_id) }}" class="btn btn-primary">
+                    <i class="fa-solid fa-rotate-right"></i> Retake Test
+                </a>
+                <a href="{{ url_for('performance') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-chart-line"></i> View AI Analysis
+                </a>
+                <a href="{{ url_for('results') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-list-check"></i> Results History
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Detailed Question Review Section -->
+        <section class="review-section">
+            <h2 class="review-title"><i class="fa-solid fa-magnifying-glass-chart"></i> Question-by-Question Review</h2>
+
+            {% for item in answer_review %}
+            <div class="review-card {{ item.status.lower() }}">
+                <div class="review-q-title">
+                    {{ loop.index }}. {{ item.question_text }}
+                </div>
+
+                <div class="answer-meta">
+                    <div>
+                        <span style="color:#94A3B8; display:block; margin-bottom:4px;">Your Response:</span>
+                        <div style="color:white; font-weight:600; line-height:1.4;">
+                            {{ item.selected_display }}
+                        </div>
+                    </div>
+                    <div>
+                        <span style="color:#94A3B8; display:block; margin-bottom:4px;">Correct Answer:</span>
+                        <div style="color:#38BDF8; font-weight:600; line-height:1.4;">
+                            {{ item.correct_display }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="status-badge {% if item.status == 'Correct' %}text-green{% elif item.status == 'Wrong' %}text-red{% else %}text-yellow{% endif %}">
+                    {% if item.status == 'Correct' %}
+                        <i class="fa-solid fa-check-circle"></i> Correct (+1 Mark)
+                    {% elif item.status == 'Wrong' %}
+                        <i class="fa-solid fa-times-circle"></i> Wrong
+                    {% else %}
+                        <i class="fa-solid fa-minus-circle"></i> Unanswered
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

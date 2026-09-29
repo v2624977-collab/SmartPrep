@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep Admin | Exam Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="circle circle1" style="background:#DC2626;"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Admin Navbar -->
+    <header class="dash-nav" style="border-bottom-color: rgba(239, 68, 68, 0.3);">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-shield-halved" style="color:#EF4444;"></i> SmartPrep <span class="admin-badge">Admin</span></h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}"><i class="fa-solid fa-gauge"></i> Overview</a>
+            <a href="{{ url_for('admin_students') }}"><i class="fa-solid fa-users"></i> Students</a>
+            <a href="{{ url_for('admin_exams') }}" class="active"><i class="fa-solid fa-book-bookmark"></i> Exams</a>
+            <a href="{{ url_for('admin_questions') }}"><i class="fa-solid fa-circle-question"></i> Questions</a>
+            <a href="{{ url_for('admin_results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('admin_logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content">
+        <div class="admin-header-row">
+            <div>
+                <h1><i class="fa-solid fa-layer-group"></i> Exam Management</h1>
+                <p style="color:#94A3B8; font-size:14px;">Configure active exams, syllabus descriptions, and durations</p>
+            </div>
+            <a href="{{ url_for('admin_add_exam') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Create New Exam
+            </a>
+        </div>
+
+        <div class="glass-card table-card">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Exam Name</th>
+                        <th>Description</th>
+                        <th>Duration</th>
+                        <th>Questions</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in exams %}
+                    <tr>
+                        <td>#{{ exam.exam_id }}</td>
+                        <td><strong>{{ exam.exam_name }}</strong></td>
+                        <td style="color:#CBD5E1; max-width:350px;">{{ exam.description }}</td>
+                        <td><i class="fa-solid fa-clock" style="color:#38BDF8; margin-right:4px;"></i> {{ exam.duration_minutes }} Mins</td>
+                        <td>
+                            <a href="{{ url_for('admin_questions', exam_id=exam.exam_id) }}" class="score-pill pill-blue" style="text-decoration:none;">
+                                {{ exam.question_count }} Questions →
+                            </a>
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:8px;">
+                                <a href="{{ url_for('admin_edit_exam', exam_id=exam.exam_id) }}" class="btn-action-sm btn-edit">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </a>
+                                <form method="POST" action="{{ url_for('admin_delete_exam', exam_id=exam.exam_id) }}" onsubmit="return confirm('Are you sure you want to delete this exam and its questions?');" style="display:inline;">
+                                    <button type="submit" class="btn-action-sm btn-delete">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

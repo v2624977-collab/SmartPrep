@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | AI Performance Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .perf-container {
+            max-width: 1100px;
+            margin: 35px auto 60px;
+        }
+
+        .ai-banner {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(14, 165, 233, 0.15));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 20px;
+            padding: 30px 35px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(16px);
+        }
+
+        .ai-banner h1 {
+            font-size: 26px;
+            color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .ai-banner p {
+            color: #CBD5E1;
+            font-size: 14px;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        @media (max-width: 900px) {
+            .analysis-grid { grid-template-columns: 1fr; }
+        }
+
+        .insight-card-full {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 28px;
+            backdrop-filter: blur(14px);
+        }
+
+        .insight-card-full h3 {
+            color: #38BDF8;
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insights-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .insight-bubble {
+            background: rgba(255, 255, 255, 0.04);
+            border-left: 4px solid #38BDF8;
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .insight-bubble i {
+            color: #38BDF8;
+            font-size: 16px;
+            margin-top: 2px;
+        }
+
+        .insight-bubble p {
+            color: #E2E8F0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .topic-pill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .topic-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .topic-pill.strong {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ADE80;
+        }
+
+        .topic-pill.weak {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #FCA5A5;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Navbar -->
+    <header class="dash-nav">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ url_for('results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('performance') }}" class="active"><i class="fa-solid fa-chart-line"></i> AI Analytics</a>
+            <a href="{{ url_for('study_planner') }}"><i class="fa-solid fa-calendar-check"></i> Study Plan</a>
+            <a href="{{ url_for('predict_score') }}"><i class="fa-solid fa-brain"></i> Score Predictor</a>
+            <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content perf-container">
+        <!-- AI Banner -->
+        <div class="ai-banner">
+            <div>
+                <h1><i class="fa-solid fa-brain"></i> AI Academic Performance Analytics</h1>
+                <p>Comprehensive statistical evaluation of your test attempts, learning trend, and accuracy</p>
+            </div>
+            <div class="badge {{ analytics.trend_badge }}" style="font-size:14px; padding:8px 18px;">
+                <i class="fa-solid fa-bolt"></i> Trajectory: {{ analytics.trend }}
+            </div>
+        </div>
+
+        {% if analytics.has_data %}
+        <!-- KPI Metrics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-blue"><i class="fa-solid fa-list-ol"></i></div>
+                <div class="stat-info">
+                    <h3>{{ analytics.total_tests }}</h3>
+                    <p>Assessments Completed</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-cyan"><i class="fa-solid fa-bullseye"></i></div>
+                <div class="stat-info">
+                    <h3>{{ analytics.avg_percentage }}%</h3>
+                    <p>Cumulative Accuracy</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-green"><i class="fa-solid fa-trophy"></i></div>
+                <div class="stat-info">
+                    <h3>{{ analytics.highest_percentage }}%</h3>
+                    <p>Peak Score</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-purple"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="stat-info">
+                    <h3>{{ analytics.latest_percentage }}%</h3>
+                    <p>Latest Assessment</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights & Competency Breakdown Grid -->
+        <div class="analysis-grid">
+            <!-- Educational AI Insights -->
+            <div class="insight-card-full">
+                <h3><i class="fa-solid fa-lightbulb"></i> Educational Insights & Recommendations</h3>
+                <div class="insights-list">
+                    {% for ins in analytics.insights %}
+                    <div class="insight-bubble">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <p>{{ ins }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Strengths & Weaknesses Panel -->
+            <div class="insight-card-full">
+                <h3><i class="fa-solid fa-crosshairs"></i> Subject Competency</h3>
+                <h4 style="color:#CBD5E1; font-size:14px; margin-bottom:8px;">Identified Strengths (≥ 75%)</h4>
+                <div class="topic-pill-list">
+                    {% if analytics.strong_areas %}
+                        {% for st in analytics.strong_areas %}
+                            <span class="topic-pill strong"><i class="fa-solid fa-check"></i> {{ st }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color:#94A3B8; font-size:13px;">Demonstrate high accuracy (≥75%) in mock tests to unlock strength badges.</p>
+                    {% endif %}
+                </div>
+
+                <hr style="border:0; height:1px; background:rgba(255,255,255,0.08); margin:18px 0;">
+
+                <h4 style="color:#CBD5E1; font-size:14px; margin-bottom:8px;">Focus / Practice Areas (< 60%)</h4>
+                <div class="topic-pill-list">
+                    {% if analytics.weak_areas %}
+                        {% for wk in analytics.weak_areas %}
+                            <span class="topic-pill weak"><i class="fa-solid fa-triangle-exclamation"></i> {{ wk }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color:#4ADE80; font-size:13px;"><i class="fa-solid fa-circle-check"></i> No critical weak areas detected (<60%).</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam-wise Performance Breakdown Table -->
+        <section class="section-block">
+            <div class="section-title">
+                <h2><i class="fa-solid fa-chart-column"></i> Exam-wise Performance Breakdown</h2>
+            </div>
+            <div class="glass-card table-card">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Exam Name</th>
+                            <th>Attempts</th>
+                            <th>Average Accuracy</th>
+                            <th>Highest Accuracy</th>
+                            <th>Readiness Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ex in analytics.exam_breakdown %}
+                        <tr>
+                            <td><strong>{{ ex.exam_name }}</strong></td>
+                            <td>{{ ex.attempts }} Attempt(s)</td>
+                            <td>
+                                <span class="score-pill {% if ex.avg_percentage >= 75 %}pill-green{% elif ex.avg_percentage >= 50 %}pill-blue{% else %}pill-red{% endif %}">
+                                    {{ ex.avg_percentage }}%
+                                </span>
+                            </td>
+                            <td style="color:#38BDF8; font-weight:600;">{{ ex.highest_percentage }}%</td>
+                            <td>
+                                {% if ex.avg_percentage >= 75 %}
+                                    <span style="color:#4ADE80;"><i class="fa-solid fa-circle-check"></i> High Readiness</span>
+                                {% elif ex.avg_percentage >= 55 %}
+                                    <span style="color:#38BDF8;"><i class="fa-solid fa-gauge"></i> Moderate Readiness</span>
+                                {% else %}
+                                    <span style="color:#FCA5A5;"><i class="fa-solid fa-book-open"></i> Needs More Study</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {% else %}
+        <!-- Insufficient Data Notice -->
+        <div class="glass-card" style="text-align: center; padding: 60px 30px;">
+            <div style="font-size: 55px; color: #38BDF8; margin-bottom: 20px;">
+                <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <h2 style="color: #F8FAFC; margin-bottom: 12px;">Complete More Mock Tests</h2>
+            <p style="color: #94A3B8; max-width: 500px; margin: 0 auto 30px; line-height: 1.6;">
+                Complete more mock tests to receive a more accurate AI-driven performance analysis, competency breakdown, and learning trajectory.
+            </p>
+            <a href="{{ url_for('dashboard') }}#available-exams" class="btn btn-primary">
+                <i class="fa-solid fa-play"></i> Take a Mock Test Now
+            </a>
+        </div>
+        {% endif %}
+    </main>
+</div>
+
+</body>
+</html>

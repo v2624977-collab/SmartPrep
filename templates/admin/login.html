@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | Administrator Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .admin-glass-card {
+            border-color: rgba(239, 68, 68, 0.3) !important;
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.15) !important;
+        }
+        .admin-badge-head {
+            display: inline-block;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #FCA5A5;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .btn-admin-login {
+            background: linear-gradient(90deg, #DC2626, #EF4444) !important;
+        }
+        .btn-admin-login:hover {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="glass-card admin-glass-card">
+        <a href="/" class="home-link"><i class="fa-solid fa-arrow-left"></i> Main Site</a>
+
+        <div class="admin-badge-head">
+            <i class="fa-solid fa-shield-halved"></i> Administrator Access
+        </div>
+
+        <h1 style="color:#FCA5A5;"><i class="fa-solid fa-lock"></i> SmartPrep Admin</h1>
+        <p class="tagline">Sign in with authorized administrator credentials</p>
+
+        {% if error %}
+        <div class="error-message">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="input-box">
+                <i class="fa-solid fa-user-shield" style="color:#FCA5A5;"></i>
+                <input type="text" name="username" placeholder="Admin Username" required autocomplete="username">
+            </div>
+
+            <div class="input-box">
+                <i class="fa-solid fa-key" style="color:#FCA5A5;"></i>
+                <input type="password" name="password" placeholder="Admin Password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="login-btn btn-admin-login">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In to Admin Console
+            </button>
+        </form>
+
+        <div class="admin-link-box" style="margin-top:25px;">
+            <a href="{{ url_for('login') }}"><i class="fa-solid fa-user-graduate"></i> Switch to Student Login</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

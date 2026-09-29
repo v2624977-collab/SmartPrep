@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep Admin | Question Bank Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="circle circle1" style="background:#DC2626;"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Admin Navbar -->
+    <header class="dash-nav" style="border-bottom-color: rgba(239, 68, 68, 0.3);">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-shield-halved" style="color:#EF4444;"></i> SmartPrep <span class="admin-badge">Admin</span></h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}"><i class="fa-solid fa-gauge"></i> Overview</a>
+            <a href="{{ url_for('admin_students') }}"><i class="fa-solid fa-users"></i> Students</a>
+            <a href="{{ url_for('admin_exams') }}"><i class="fa-solid fa-book-bookmark"></i> Exams</a>
+            <a href="{{ url_for('admin_questions') }}" class="active"><i class="fa-solid fa-circle-question"></i> Questions</a>
+            <a href="{{ url_for('admin_results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('admin_logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content">
+        <div class="admin-header-row">
+            <div>
+                <h1><i class="fa-solid fa-database"></i> Question Bank</h1>
+                <p style="color:#94A3B8; font-size:14px;">Total Questions in Bank: {{ questions|length }}</p>
+            </div>
+
+            <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                <!-- Filter by Exam -->
+                <form method="GET" style="display:flex; align-items:center; gap:8px;">
+                    <label style="font-size:13px; color:#94A3B8;">Filter by Exam:</label>
+                    <select name="exam_id" onchange="this.form.submit()" class="search-input" style="width:auto; padding:8px 12px;">
+                        <option value="">All Exams</option>
+                        {% for ex in exams %}
+                        <option value="{{ ex.exam_id }}" {% if selected_exam|string == ex.exam_id|string %}selected{% endif %}>{{ ex.exam_name }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+
+                <a href="{{ url_for('admin_add_question') }}" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> Add New Question
+                </a>
+            </div>
+        </div>
+
+        <div class="glass-card table-card">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Exam</th>
+                        <th>Question Text</th>
+                        <th>Options (A, B, C, D)</th>
+                        <th>Correct Key</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if questions %}
+                        {% for q in questions %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td><span class="score-pill pill-blue">{{ q.exam_name }}</span></td>
+                            <td style="max-width:320px; font-weight:500;">{{ q.question_text }}</td>
+                            <td style="font-size:12px; color:#CBD5E1; max-width:280px;">
+                                <div><strong>A:</strong> {{ q.option_a }}</div>
+                                <div><strong>B:</strong> {{ q.option_b }}</div>
+                                <div><strong>C:</strong> {{ q.option_c }}</div>
+                                <div><strong>D:</strong> {{ q.option_d }}</div>
+                            </td>
+                            <td>
+                                <span class="score-pill pill-green" style="font-weight:700;">
+                                    Option {{ q.correct_answer }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display:flex; gap:8px;">
+                                    <a href="{{ url_for('admin_edit_question', question_id=q.question_id) }}" class="btn-action-sm btn-edit">
+                                        <i class="fa-solid fa-pen"></i> Edit
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin_delete_question', question_id=q.question_id) }}" onsubmit="return confirm('Delete this question permanently?');" style="display:inline;">
+                                        <button type="submit" class="btn-action-sm btn-delete">
+                                            <i class="fa-solid fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:35px; color:#94A3B8;">No questions found for the selected filter.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

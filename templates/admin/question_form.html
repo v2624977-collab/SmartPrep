@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep Admin | {{ action }} Question</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="circle circle1" style="background:#DC2626;"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Admin Navbar -->
+    <header class="dash-nav" style="border-bottom-color: rgba(239, 68, 68, 0.3);">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-shield-halved" style="color:#EF4444;"></i> SmartPrep <span class="admin-badge">Admin</span></h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}"><i class="fa-solid fa-gauge"></i> Overview</a>
+            <a href="{{ url_for('admin_students') }}"><i class="fa-solid fa-users"></i> Students</a>
+            <a href="{{ url_for('admin_exams') }}"><i class="fa-solid fa-book-bookmark"></i> Exams</a>
+            <a href="{{ url_for('admin_questions') }}" class="active"><i class="fa-solid fa-circle-question"></i> Questions</a>
+            <a href="{{ url_for('admin_results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('admin_logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content" style="max-width:800px;">
+        <div class="glass-card profile-form-card">
+            <h3><i class="fa-solid fa-circle-question"></i> {{ action }} Multiple Choice Question</h3>
+
+            {% if error %}
+            <div class="alert-box error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                <div class="form-group">
+                    <label>Target Exam</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <select name="exam_id" class="input-with-icon input" required style="width:100%; padding:13px 15px 13px 42px; border-radius:10px; background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255, 255, 255, 0.12); color:white; font-size:14px; outline:none;">
+                            <option value="">Select Exam</option>
+                            {% for ex in exams %}
+                            <option value="{{ ex.exam_id }}" {% if question and question.exam_id|string == ex.exam_id|string %}selected{% endif %}>{{ ex.exam_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Question Statement</label>
+                    <textarea name="question_text" rows="3" placeholder="Enter full question text here..." required style="width:100%; padding:14px; border-radius:10px; background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255, 255, 255, 0.12); color:white; font-size:14px; outline:none; font-family:'Poppins', sans-serif;">{{ question.question_text if question else '' }}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Option A</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-a"></i>
+                            <input type="text" name="option_a" value="{{ question.option_a if question else '' }}" placeholder="Option A text" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Option B</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-b"></i>
+                            <input type="text" name="option_b" value="{{ question.option_b if question else '' }}" placeholder="Option B text" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Option C</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-c"></i>
+                            <input type="text" name="option_c" value="{{ question.option_c if question else '' }}" placeholder="Option C text" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Option D</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-d"></i>
+                            <input type="text" name="option_d" value="{{ question.option_d if question else '' }}" placeholder="Option D text" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Correct Answer Key (A, B, C, or D)</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-key"></i>
+                        <select name="correct_answer" required style="width:100%; padding:13px 15px 13px 42px; border-radius:10px; background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255, 255, 255, 0.12); color:white; font-size:14px; outline:none;">
+                            <option value="">Select Correct Option</option>
+                            <option value="A" {% if question and question.correct_answer == 'A' %}selected{% endif %}>Option A</option>
+                            <option value="B" {% if question and question.correct_answer == 'B' %}selected{% endif %}>Option B</option>
+                            <option value="C" {% if question and question.correct_answer == 'C' %}selected{% endif %}>Option C</option>
+                            <option value="D" {% if question and question.correct_answer == 'D' %}selected{% endif %}>Option D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Question</button>
+                    <a href="{{ url_for('admin_questions') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.exam_name }} | SmartPrep Exam Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .exam-details-container {
+            max-width: 960px;
+            margin: 40px auto 60px;
+        }
+
+        .exam-banner-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 24px;
+            padding: 40px 35px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(18px);
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .exam-icon-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #2563EB, #0EA5E9);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+        }
+
+        .exam-banner-card h1 {
+            color: #38BDF8;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .exam-banner-card .desc {
+            color: #CBD5E1;
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .info-pill-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 35px;
+        }
+
+        .info-pill {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 16px 24px;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .info-pill h4 {
+            color: #38BDF8;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .info-pill p {
+            color: #94A3B8;
+            font-size: 13px;
+        }
+
+        /* Practice Quizzes Hierarchy Section */
+        .practice-hub-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .practice-hub-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .practice-hub-header h2 {
+            color: #F8FAFC;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .practice-hub-header h2 i {
+            color: #38BDF8;
+        }
+
+        .tree-overview-box {
+            background: rgba(11, 18, 36, 0.7);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #CBD5E1;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .tree-overview-box .tree-root {
+            color: #38BDF8;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .tree-overview-box .tree-item {
+            color: #E2E8F0;
+        }
+
+        .tree-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-easy { background: rgba(16, 185, 129, 0.2); color: #34D399; border: 1px solid rgba(52, 211, 153, 0.3); }
+        .badge-easy-mod { background: rgba(6, 182, 212, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .badge-moderate { background: rgba(245, 158, 11, 0.2); color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.3); }
+        .badge-mod-diff { background: rgba(249, 115, 22, 0.2); color: #FB923C; border: 1px solid rgba(251, 146, 60, 0.3); }
+        .badge-difficult { background: rgba(239, 68, 68, 0.2); color: #F87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+
+        /* Practice Quiz Cards Grid */
+        .quiz-cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 15px;
+        }
+
+        .quiz-row-card {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            transition: 0.3s;
+            backdrop-filter: blur(12px);
+        }
+
+        .quiz-row-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .quiz-row-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex: 1;
+        }
+
+        .quiz-number-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .quiz-info-content h3 {
+            color: #F8FAFC;
+            font-size: 17px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-info-content p {
+            color: #94A3B8;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .quiz-meta-tags {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 12px;
+            color: #64748B;
+        }
+
+        .quiz-meta-tags span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-start-quiz {
+            background: linear-gradient(90deg, #2563EB, #0EA5E9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-start-quiz:hover {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .instructions-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 25px 30px;
+            text-align: left;
+            margin-bottom: 35px;
+        }
+
+        .instructions-box h3 {
+            color: #F8FAFC;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions-box ul {
+            padding-left: 20px;
+            color: #CBD5E1;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .action-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .btn-start-lg {
+            background: linear-gradient(90deg, #2563EB, #0EA5E9);
+            color: white;
+            padding: 14px 34px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-start-lg:hover {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-back-lg {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #CBD5E1;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-back-lg:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Navbar Header -->
+    <header class="dash-nav">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ url_for('results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('performance') }}"><i class="fa-solid fa-chart-line"></i> AI Analytics</a>
+            <a href="{{ url_for('study_planner') }}"><i class="fa-solid fa-calendar-check"></i> Study Plan</a>
+            <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content exam-details-container">
+        <!-- Main Exam Overview Banner -->
+        <div class="exam-banner-card">
+            <div class="exam-icon-large">
+                <i class="fa-solid fa-book-open-reader"></i>
+            </div>
+
+            <h1>{{ exam.exam_name }}</h1>
+            <p class="desc">{{ exam.description if exam.description else 'Official competitive examination preparation hub and mock assessment series.' }}</p>
+
+            <!-- Dynamic Meta Info Pills -->
+            <div class="info-pill-row">
+                <div class="info-pill">
+                    <h4>{{ total_practice_questions if practice_quizzes else question_count }}</h4>
+                    <p>{{ 'Total Practice Questions' if practice_quizzes else 'Total Questions' }}</p>
+                </div>
+                <div class="info-pill">
+                    <h4>{{ (practice_quizzes|length ~ ' Quizzes') if practice_quizzes else (exam.duration_minutes ~ ' Mins') }}</h4>
+                    <p>{{ 'Practice Series' if practice_quizzes else 'Time Limit' }}</p>
+                </div>
+                <div class="info-pill">
+                    <h4>MCQ</h4>
+                    <p>4 Options (A/B/C/D)</p>
+                </div>
+            </div>
+
+            <!-- Practice Quizzes Hierarchy Section -->
+            {% if practice_quizzes %}
+            <div class="practice-hub-section">
+                <div class="practice-hub-header">
+                    <h2><i class="fa-solid fa-sitemap"></i> {{ base_name }} Practice Series Structure</h2>
+                    <span style="color:#94A3B8; font-size:13px;"><i class="fa-solid fa-list-check"></i> {{ practice_quizzes|length }} Graded Quizzes ({{ total_practice_questions }} Questions)</span>
+                </div>
+
+                <!-- Visual Tree Hierarchy Box -->
+                <div class="tree-overview-box">
+                    <div class="tree-root"><i class="fa-solid fa-folder-open"></i> {{ base_name }}</div>
+                    <div class="tree-item">&nbsp;├── <i class="fa-solid fa-file-lines" style="color:#34D399;"></i> <strong>Practice Quiz 1</strong> — 20 Questions — <span class="tree-badge badge-easy">Easy</span></div>
+                    <div class="tree-item">&nbsp;├── <i class="fa-solid fa-file-lines" style="color:#38BDF8;"></i> <strong>Practice Quiz 2</strong> — 20 Questions — <span class="tree-badge badge-easy-mod">Easy to Moderate</span></div>
+                    <div class="tree-item">&nbsp;├── <i class="fa-solid fa-file-lines" style="color:#FBBF24;"></i> <strong>Practice Quiz 3</strong> — 20 Questions — <span class="tree-badge badge-moderate">Moderate</span></div>
+                    <div class="tree-item">&nbsp;├── <i class="fa-solid fa-file-lines" style="color:#FB923C;"></i> <strong>Practice Quiz 4</strong> — 20 Questions — <span class="tree-badge badge-mod-diff">Moderate to Difficult</span></div>
+                    <div class="tree-item">&nbsp;└── <i class="fa-solid fa-file-lines" style="color:#F87171;"></i> <strong>Practice Quiz 5</strong> — 20 Questions — <span class="tree-badge badge-difficult">Difficult</span></div>
+                </div>
+
+                <!-- Individual Practice Quiz Cards -->
+                <div class="quiz-cards-grid">
+                    {% for pq in practice_quizzes %}
+                    <div class="quiz-row-card">
+                        <div class="quiz-row-left">
+                            <div class="quiz-number-circle" style="background: {{ pq.color }}22; color: {{ pq.color }}; border: 1px solid {{ pq.color }}55;">
+                                <i class="fa-solid {{ pq.icon }}"></i>
+                            </div>
+                            <div class="quiz-info-content">
+                                <h3>
+                                    {{ pq.exam_name }}
+                                    <span class="tree-badge {{ pq.badge_class }}">{{ pq.difficulty }}</span>
+                                </h3>
+                                <p>{{ pq.description }}</p>
+                                <div class="quiz-meta-tags">
+                                    <span><i class="fa-solid fa-circle-question" style="color:#38BDF8;"></i> {{ pq.question_count }} Questions</span>
+                                    <span><i class="fa-solid fa-clock" style="color:#38BDF8;"></i> {{ pq.duration_minutes }} Minutes</span>
+                                    <span><i class="fa-solid fa-award" style="color:#38BDF8;"></i> 1 Mark / Question</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a href="{{ url_for('start_exam', exam_id=pq.exam_id) }}" class="btn-start-quiz">
+                                <i class="fa-solid fa-play"></i> Start Practice
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Exam Guidelines & Instructions -->
+            <div class="instructions-box" style="margin-top: 35px;">
+                <h3><i class="fa-solid fa-circle-info"></i> Instructions & Rules</h3>
+                <ul>
+                    <li>Each practice quiz consists of exactly <strong>20 multiple-choice questions</strong> with 4 options (A, B, C, D).</li>
+                    <li>Questions carry equal weightage with exactly <strong>one correct answer</strong>.</li>
+                    <li>A live countdown timer will run continuously during the assessment.</li>
+                    <li>You can answer questions in any order and leave questions unanswered if unsure.</li>
+                    <li>Instant score calculation, percentage, and a full question-by-question review will be generated immediately upon submission.</li>
+                </ul>
+            </div>
+
+            {% if error %}
+            <div class="alert-box error" style="margin-bottom: 25px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Back to Dashboard / Start Button -->
+            <div class="action-btn-group">
+                {% if not practice_quizzes and question_count > 0 %}
+                <a href="{{ url_for('start_exam', exam_id=exam.exam_id) }}" class="btn-start-lg">
+                    <i class="fa-solid fa-play"></i> Start Mock Test
+                </a>
+                {% elif practice_quizzes %}
+                <a href="{{ url_for('start_exam', exam_id=practice_quizzes[0].exam_id) }}" class="btn-start-lg">
+                    <i class="fa-solid fa-play"></i> Start Quiz 1 (Easy)
+                </a>
+                {% endif %}
+                <a href="{{ url_for('dashboard') }}" class="btn-back-lg">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

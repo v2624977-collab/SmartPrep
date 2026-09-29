@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | Student Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Chart.js for Progress Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+<div class="circle circle3"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Top Navigation Bar -->
+    <header class="dash-nav">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ url_for('results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('performance') }}"><i class="fa-solid fa-chart-line"></i> AI Analytics</a>
+            <a href="{{ url_for('study_planner') }}"><i class="fa-solid fa-calendar-check"></i> Study Plan</a>
+            <a href="{{ url_for('predict_score') }}"><i class="fa-solid fa-brain"></i> Score Predictor</a>
+            <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content">
+        <!-- Welcome Banner -->
+        <div class="welcome-header">
+            <div>
+                <h1>Welcome back, <span class="highlight">{{ student_name }}</span>! 👋</h1>
+                <p>Track your preparation progress, analyze mock test performance, and prepare smarter.</p>
+            </div>
+            <div class="header-action">
+                <a href="#available-exams" class="btn-start-quick"><i class="fa-solid fa-play"></i> Start Mock Test</a>
+            </div>
+        </div>
+
+        <!-- 4 KPI Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-blue"><i class="fa-solid fa-clipboard-check"></i></div>
+                <div class="stat-info">
+                    <h3>{{ total_results_count }}</h3>
+                    <p>Total Tests Attempted</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-cyan"><i class="fa-solid fa-chart-pie"></i></div>
+                <div class="stat-info">
+                    <h3>{{ analytics.avg_percentage }}%</h3>
+                    <p>Average Accuracy</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-green"><i class="fa-solid fa-trophy"></i></div>
+                <div class="stat-info">
+                    <h3>{{ analytics.highest_percentage }}%</h3>
+                    <p>Highest Score</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-purple"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="stat-info">
+                    <h3>{{ analytics.latest_percentage }}%</h3>
+                    <p>Latest Test Score</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics & Progress Chart Section -->
+        {% if total_results_count > 0 %}
+        <div class="chart-section-grid">
+            <!-- Score Progression Chart -->
+            <div class="glass-card chart-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-chart-area"></i> Score Progression History</h3>
+                    <span class="badge {{ analytics.trend_badge }}"><i class="fa-solid fa-bolt"></i> {{ analytics.trend }}</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="scoreHistoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- AI Insight Quick Card -->
+            <div class="glass-card insight-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-robot"></i> AI Performance Summary</h3>
+                </div>
+                <div class="insight-body">
+                    {% for insight in analytics.insights %}
+                    <div class="insight-item">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <p>{{ insight }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="card-footer-action">
+                    <a href="{{ url_for('performance') }}" class="link-btn">View Deep Analytics →</a>
+                    <a href="{{ url_for('predict_score') }}" class="link-btn">Predict Future Score →</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Available Exams Section -->
+        <section class="section-block" id="available-exams">
+            <div class="section-title">
+                <h2><i class="fa-solid fa-layer-group"></i> Competitive Exam Hub</h2>
+                <p>Choose a target examination to explore syllabus structure or attempt full timed mock assessments</p>
+            </div>
+
+            <div class="exams-grid">
+                {% for exam in primary_exams %}
+                <div class="exam-card {% if 'TANCET' in exam.exam_name.upper() %}tancet-card-highlight{% endif %}">
+                    <div class="exam-card-header">
+                        <div class="exam-icon-badge">
+                            <i class="fa-solid {% if 'TANCET' in exam.exam_name.upper() %}fa-graduation-cap{% elif 'GATE' in exam.exam_name.upper() %}fa-microchip{% elif 'TNPSC' in exam.exam_name.upper() %}fa-landmark{% elif 'SSC' in exam.exam_name.upper() %}fa-building-columns{% else %}fa-brain{% endif %}"></i>
+                        </div>
+                        <div class="exam-title-box">
+                            <h3>{{ exam.exam_name }}</h3>
+                            <span class="exam-tag">5 Practice Quizzes</span>
+                        </div>
+                    </div>
+
+                    <p class="exam-desc">
+                        {{ exam.description if exam.description else 'Comprehensive mock test with curated syllabus-based questions.' }}
+                    </p>
+
+                    <div class="exam-meta">
+                        <span><i class="fa-solid fa-circle-question"></i> {{ exam.total_practice_count if exam.total_practice_count else '100' }} Questions (5 Quizzes)</span>
+                        <span><i class="fa-solid fa-clock"></i> {{ exam.duration_minutes }} Minutes</span>
+                    </div>
+
+                    <div class="exam-actions">
+                        <a href="{{ url_for('exam_details', exam_id=exam.exam_id) }}" class="btn btn-view">
+                            <i class="fa-solid fa-circle-info"></i> Explore 5 Quizzes
+                        </a>
+                        <a href="{{ url_for('start_exam', exam_id=exam.first_quiz_id) }}" class="btn btn-start">
+                            <i class="fa-solid fa-play"></i> Start Quiz 1
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Dedicated Practice Series Hub for All Exams -->
+        {% if all_practice_quizzes %}
+        <section class="section-block" id="practice-series" style="margin-top: 40px;">
+            <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h2><i class="fa-solid fa-sitemap" style="color:#38BDF8;"></i> Practice Quiz Hub (Graded Quizzes 1 to 5)</h2>
+                    <p style="color:#94A3B8; font-size:14px; margin-top:4px;">Structured 20-question practice modules ranging from Easy to Difficult</p>
+                </div>
+                <!-- Filter Pills -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="quizFilterGroup">
+                    <button type="button" class="btn-filter-pill active" onclick="filterQuizzes('all', this)">All (25)</button>
+                    <button type="button" class="btn-filter-pill" onclick="filterQuizzes('TANCET', this)">TANCET</button>
+                    <button type="button" class="btn-filter-pill" onclick="filterQuizzes('GATE', this)">GATE</button>
+                    <button type="button" class="btn-filter-pill" onclick="filterQuizzes('TNPSC', this)">TNPSC</button>
+                    <button type="button" class="btn-filter-pill" onclick="filterQuizzes('SSC', this)">SSC CGL</button>
+                    <button type="button" class="btn-filter-pill" onclick="filterQuizzes('CAT', this)">CAT</button>
+                </div>
+            </div>
+
+            <style>
+                .btn-filter-pill {
+                    background: rgba(15, 23, 42, 0.7);
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    color: #94A3B8;
+                    padding: 6px 14px;
+                    border-radius: 20px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: 0.25s;
+                }
+                .btn-filter-pill:hover, .btn-filter-pill.active {
+                    background: linear-gradient(90deg, #2563EB, #0EA5E9);
+                    border-color: #38BDF8;
+                    color: #FFFFFF;
+                    box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+                }
+            </style>
+
+            <div class="exams-grid" id="practiceQuizzesGrid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 20px;">
+                {% for pq in all_practice_quizzes %}
+                <div class="exam-card quiz-item-card" data-exam-type="{% if 'TANCET' in pq.exam_name.upper() %}TANCET{% elif 'GATE' in pq.exam_name.upper() %}GATE{% elif 'TNPSC' in pq.exam_name.upper() %}TNPSC{% elif 'SSC' in pq.exam_name.upper() %}SSC{% elif 'CAT' in pq.exam_name.upper() %}CAT{% else %}OTHER{% endif %}" style="border-left: 4px solid {{ pq.color }};">
+                    <div class="exam-card-header">
+                        <div class="exam-icon-badge" style="background: {{ pq.color }}22; color: {{ pq.color }};">
+                            <i class="fa-solid {{ pq.icon }}"></i>
+                        </div>
+                        <div class="exam-title-box">
+                            <h3 style="font-size: 16px;">{{ pq.exam_name }}</h3>
+                            <span class="score-pill {{ pq.badge_class }}" style="font-size: 11px; padding: 2px 8px;">{{ pq.difficulty }}</span>
+                        </div>
+                    </div>
+
+                    <p class="exam-desc" style="font-size: 13px;">
+                        {{ pq.description }}
+                    </p>
+
+                    <div class="exam-meta">
+                        <span><i class="fa-solid fa-circle-question" style="color:#38BDF8;"></i> {{ pq.question_count }} Questions</span>
+                        <span><i class="fa-solid fa-clock" style="color:#38BDF8;"></i> {{ pq.duration_minutes }} Mins</span>
+                    </div>
+
+                    <div class="exam-actions">
+                        <a href="{{ url_for('start_exam', exam_id=pq.exam_id) }}" class="btn btn-start" style="width: 100%; justify-content: center;">
+                            <i class="fa-solid fa-play"></i> Start Quiz
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <script>
+                function filterQuizzes(type, btn) {
+                    document.querySelectorAll('#quizFilterGroup .btn-filter-pill').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const cards = document.querySelectorAll('#practiceQuizzesGrid .quiz-item-card');
+                    cards.forEach(card => {
+                        if (type === 'all' || card.dataset.examType === type) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                }
+            </script>
+        </section>
+        {% endif %}
+
+        <!-- Recent Results Section -->
+        {% if results %}
+        <section class="section-block">
+            <div class="section-title">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Test Attempts</h2>
+                <a href="{{ url_for('results') }}" class="link-btn">View All Results ({{ total_results_count }}) →</a>
+            </div>
+
+            <div class="glass-card table-card">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Exam Name</th>
+                            <th>Score</th>
+                            <th>Accuracy</th>
+                            <th>Date & Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for res in results %}
+                        <tr>
+                            <td><strong>{{ res.exam_name }}</strong></td>
+                            <td>{{ res.score }} / {{ res.total_questions }}</td>
+                            <td>
+                                <span class="score-pill {% if res.percentage >= 75 %}pill-green{% elif res.percentage >= 50 %}pill-blue{% else %}pill-red{% endif %}">
+                                    {{ res.percentage }}%
+                                </span>
+                            </td>
+                            <td><i class="fa-regular fa-calendar"></i> {{ res.test_date }}</td>
+                            <td>
+                                <a href="{{ url_for('start_exam', exam_id=res.exam_id) }}" class="table-action-btn" title="Retake Exam">
+                                    <i class="fa-solid fa-rotate-right"></i> Retake
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+</div>
+
+<!-- Chart Script -->
+{% if total_results_count > 0 %}
+<script>
+    const ctx = document.getElementById('scoreHistoryChart').getContext('2d');
+    const chartLabels = {{ chart_labels | tojson }};
+    const chartScores = {{ chart_scores | tojson }};
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabels.length > 0 ? chartLabels : ['Test 1'],
+            datasets: [{
+                label: 'Score Percentage (%)',
+                data: chartScores.length > 0 ? chartScores : [0],
+                borderColor: '#38BDF8',
+                backgroundColor: 'rgba(56, 189, 248, 0.12)',
+                borderWidth: 3,
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#2563EB',
+                pointBorderColor: '#38BDF8',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100,
+                    grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                    ticks: { color: '#94A3B8', callback: value => value + '%' }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94A3B8' }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+
+</body>
+</html>

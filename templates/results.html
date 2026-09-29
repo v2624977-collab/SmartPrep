@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | My Test Results History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .history-container {
+            max-width: 950px;
+            margin: 35px auto 60px;
+        }
+
+        .empty-history-card {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 60px 30px;
+            text-align: center;
+            backdrop-filter: blur(16px);
+        }
+
+        .empty-icon {
+            font-size: 55px;
+            color: #38BDF8;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .empty-history-card h3 {
+            color: #F8FAFC;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .empty-history-card p {
+            color: #94A3B8;
+            max-width: 480px;
+            margin: 0 auto 25px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="circle circle1"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Navbar -->
+    <header class="dash-nav">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-graduation-cap"></i> SmartPrep</h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="{{ url_for('results') }}" class="active"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('performance') }}"><i class="fa-solid fa-chart-line"></i> AI Analytics</a>
+            <a href="{{ url_for('study_planner') }}"><i class="fa-solid fa-calendar-check"></i> Study Plan</a>
+            <a href="{{ url_for('predict_score') }}"><i class="fa-solid fa-brain"></i> Score Predictor</a>
+            <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content history-container">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px;">
+            <div>
+                <h1><i class="fa-solid fa-clock-rotate-left"></i> Assessment History</h1>
+                <p>Track all your past mock test attempts and historical score progression</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}#available-exams" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Take New Test
+            </a>
+        </div>
+
+        {% if results %}
+        <div class="glass-card table-card">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Exam Name</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Completion Date</th>
+                        <th>Performance Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td style="color:#94A3B8;">{{ loop.index }}</td>
+                        <td><strong>{{ r.exam_name }}</strong></td>
+                        <td><span style="font-weight:600; color:#38BDF8;">{{ r.score }}</span> / {{ r.total_questions }}</td>
+                        <td>
+                            <span class="score-pill {% if r.percentage >= 75 %}pill-green{% elif r.percentage >= 50 %}pill-blue{% else %}pill-red{% endif %}">
+                                {{ r.percentage }}%
+                            </span>
+                        </td>
+                        <td><i class="fa-regular fa-calendar-days" style="color:#38BDF8; margin-right:5px;"></i> {{ r.formatted_date }}</td>
+                        <td>
+                            {% if r.percentage >= 80 %}
+                                <span style="color:#4ADE80; font-size:13px; font-weight:500;"><i class="fa-solid fa-star"></i> Excellent</span>
+                            {% elif r.percentage >= 60 %}
+                                <span style="color:#38BDF8; font-size:13px; font-weight:500;"><i class="fa-solid fa-thumbs-up"></i> Good</span>
+                            {% else %}
+                                <span style="color:#FCA5A5; font-size:13px; font-weight:500;"><i class="fa-solid fa-arrow-trend-up"></i> Needs Practice</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Empty State Card -->
+        <div class="empty-history-card">
+            <div class="empty-icon">
+                <i class="fa-solid fa-file-circle-question"></i>
+            </div>
+            <h3>No Tests Completed Yet</h3>
+            <p>You haven't attempted any mock tests so far. Take your first timed mock exam to see your scores and AI analytics right here.</p>
+            <a href="{{ url_for('dashboard') }}#available-exams" class="btn btn-primary">
+                <i class="fa-solid fa-play"></i> Start Your First Mock Test
+            </a>
+        </div>
+        {% endif %}
+    </main>
+</div>
+
+</body>
+</html>

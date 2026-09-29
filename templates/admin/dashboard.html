@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPrep | Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="circle circle1" style="background:#DC2626;"></div>
+<div class="circle circle2"></div>
+
+<div class="dashboard-wrapper">
+    <!-- Admin Navbar -->
+    <header class="dash-nav" style="border-bottom-color: rgba(239, 68, 68, 0.3);">
+        <div class="nav-brand">
+            <h2><i class="fa-solid fa-shield-halved" style="color:#EF4444;"></i> SmartPrep <span class="admin-badge">Admin</span></h2>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fa-solid fa-gauge"></i> Overview</a>
+            <a href="{{ url_for('admin_students') }}"><i class="fa-solid fa-users"></i> Students</a>
+            <a href="{{ url_for('admin_exams') }}"><i class="fa-solid fa-book-bookmark"></i> Exams</a>
+            <a href="{{ url_for('admin_questions') }}"><i class="fa-solid fa-circle-question"></i> Questions</a>
+            <a href="{{ url_for('admin_results') }}"><i class="fa-solid fa-square-poll-vertical"></i> Results</a>
+            <a href="{{ url_for('admin_logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </header>
+
+    <main class="dash-content">
+        <!-- Admin Welcome Header -->
+        <div class="welcome-header" style="border-color: rgba(239, 68, 68, 0.35);">
+            <div>
+                <h1>Admin Command Center 👋</h1>
+                <p>Welcome, <strong>{{ admin_username }}</strong> | Manage competitive exams, question banks, student records, and results.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <a href="{{ url_for('admin_add_question') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Question</a>
+                <a href="{{ url_for('admin_add_exam') }}" class="btn btn-secondary"><i class="fa-solid fa-folder-plus"></i> Add Exam</a>
+            </div>
+        </div>
+
+        <!-- 4 KPI Platform Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-blue"><i class="fa-solid fa-user-graduate"></i></div>
+                <div class="stat-info">
+                    <h3>{{ total_students }}</h3>
+                    <p>Registered Students</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-cyan"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="stat-info">
+                    <h3>{{ total_exams }}</h3>
+                    <p>Total Exams Active</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-green"><i class="fa-solid fa-list-check"></i></div>
+                <div class="stat-info">
+                    <h3>{{ total_questions }}</h3>
+                    <p>Total MCQ Bank</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-purple"><i class="fa-solid fa-clipboard-check"></i></div>
+                <div class="stat-info">
+                    <h3>{{ total_tests }}</h3>
+                    <p>Mock Tests Taken</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Platform Submissions Section -->
+        <section class="section-block">
+            <div class="section-title">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> Latest Student Submissions</h2>
+                <a href="{{ url_for('admin_results') }}" class="link-btn">View All Submissions →</a>
+            </div>
+
+            <div class="glass-card table-card">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Exam</th>
+                            <th>Score</th>
+                            <th>Accuracy</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_results %}
+                            {% for r in recent_results %}
+                            <tr>
+                                <td><strong><i class="fa-solid fa-user" style="color:#38BDF8; margin-right:6px;"></i> {{ r.full_name }}</strong></td>
+                                <td>{{ r.exam_name }}</td>
+                                <td>{{ r.score }} / {{ r.total_questions }}</td>
+                                <td>
+                                    <span class="score-pill {% if r.percentage >= 75 %}pill-green{% elif r.percentage >= 50 %}pill-blue{% else %}pill-red{% endif %}">
+                                        {{ r.percentage }}%
+                                    </span>
+                                </td>
+                                <td>{{ r.test_date }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:30px; color:#94A3B8;">No test submissions recorded yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+</body>
+</html>
