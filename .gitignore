@@ -53,6 +53,7 @@ cover/
 .env
 .env.*
 !.env.example
+*.pem
 env
 env/
 venv/

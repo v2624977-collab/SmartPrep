@@ -1,9 +1,17 @@
+import os
+import base64
+import tempfile
 import functools
 import secrets
 import hashlib
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 import pymysql
 import pymysql.cursors
+
+# Ensure .env is loaded from the project directory
+env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+load_dotenv(dotenv_path=env_path)
 
 from flask import Flask, render_template, request, session, redirect, url_for, flash, g
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -20,11 +28,57 @@ app.secret_key = "smartprep_secret_key"
 
 # ---------------- MYSQL CONFIGURATION ----------------
 app.config["MYSQL_HOST"] = Config.MYSQL_HOST
+app.config["MYSQL_PORT"] = int(getattr(Config, "MYSQL_PORT", 3306))
 app.config["MYSQL_USER"] = Config.MYSQL_USER
 app.config["MYSQL_PASSWORD"] = Config.MYSQL_PASSWORD
 app.config["MYSQL_DB"] = Config.MYSQL_DB
-app.config["MYSQL_PORT"] = int(getattr(Config, "MYSQL_PORT", 3306))
+app.config["MYSQL_SSL_CA"] = getattr(Config, "MYSQL_SSL_CA", "")
 app.config["MYSQL_CURSORCLASS"] = "DictCursor"
+
+# ---------------- AIVEN MYSQL SSL HELPER ----------------
+def get_mysql_ssl_config():
+    ca_value = app.config.get("MYSQL_SSL_CA", "")
+
+    if not ca_value:
+        return None
+
+    ca_value = str(ca_value).strip()
+
+    # If MYSQL_SSL_CA is a local certificate file path
+    if os.path.isfile(ca_value):
+        return {
+            "ca": ca_value,
+            "check_hostname": True
+        }
+
+    # If the environment variable contains the actual PEM certificate
+    if "-----BEGIN CERTIFICATE-----" in ca_value:
+        ca_data = ca_value
+    else:
+        # Otherwise treat it as Base64 encoded certificate
+        try:
+            ca_data = base64.b64decode(ca_value).decode("utf-8")
+        except Exception:
+            ca_data = ""
+
+    if "-----BEGIN CERTIFICATE-----" not in ca_data:
+        return None
+
+    # Vercel/serverless environments allow temporary files
+    ca_path = os.path.join(tempfile.gettempdir(), "aiven-ca.pem")
+
+    with open(
+        ca_path,
+        "w",
+        encoding="utf-8",
+        newline="\n"
+    ) as certificate_file:
+        certificate_file.write(ca_data)
+
+    return {
+        "ca": ca_path,
+        "check_hostname": True
+    }
 
 # ---------------- PURE PYTHON MYSQL WRAPPER ----------------
 class MySQL:
@@ -46,15 +100,32 @@ class MySQL:
     @property
     def connection(self):
         if not hasattr(g, '_mysql_conn') or g._mysql_conn is None or not g._mysql_conn.open:
-            g._mysql_conn = pymysql.connect(
-                host=app.config.get("MYSQL_HOST", "localhost"),
-                user=app.config.get("MYSQL_USER", "root"),
-                password=app.config.get("MYSQL_PASSWORD", ""),
-                database=app.config.get("MYSQL_DB", "smartprep"),
-                port=int(app.config.get("MYSQL_PORT", 3306)),
-                cursorclass=pymysql.cursors.DictCursor,
-                autocommit=False
-            )
+            connection_config = {
+                "host": app.config.get("MYSQL_HOST", "localhost"),
+                "port": int(app.config.get("MYSQL_PORT", 3306)),
+                "user": app.config.get("MYSQL_USER", "root"),
+                "password": app.config.get("MYSQL_PASSWORD", ""),
+                "database": app.config.get("MYSQL_DB", "smartprep"),
+                "cursorclass": pymysql.cursors.DictCursor,
+                "autocommit": False,
+                "charset": "utf8mb4",
+                "connect_timeout": 15,
+                "read_timeout": 30,
+                "write_timeout": 30
+            }
+
+            ssl_config = get_mysql_ssl_config()
+
+            if ssl_config:
+                connection_config["ssl"] = ssl_config
+            elif "aivencloud.com" in str(
+                app.config.get("MYSQL_HOST", "")
+            ).lower():
+                raise RuntimeError(
+                    "Aiven MySQL requires SSL. Please configure MYSQL_SSL_CA."
+                )
+
+            g._mysql_conn = pymysql.connect(**connection_config)
         return g._mysql_conn
 
 # ---------------- INITIALIZE MYSQL ----------------
