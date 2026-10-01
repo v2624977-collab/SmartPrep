@@ -87,7 +87,7 @@ body{
     margin-bottom:18px;
 }
 
-.input-box i{
+.input-box > i:first-child{
     position:absolute;
     left:16px;
     top:16px;
@@ -96,7 +96,7 @@ body{
 
 .input-box input{
     width:100%;
-    padding:14px 16px 14px 45px;
+    padding:14px 45px 14px 45px;
     border:1px solid rgba(255,255,255,.12);
     outline:none;
     border-radius:12px;
@@ -114,6 +114,34 @@ body{
 
 .input-box input::placeholder{
     color:#94A3B8;
+}
+
+.toggle-password{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    background:transparent;
+    border:none;
+    outline:none;
+    cursor:pointer;
+    color:#94A3B8;
+    padding:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:color .3s ease;
+    z-index:2;
+}
+
+.toggle-password:hover{
+    color:#38BDF8;
+}
+
+.toggle-password i{
+    position:static !important;
+    color:inherit !important;
+    font-size:16px;
 }
 
 .login-btn{
